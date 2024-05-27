@@ -1,4 +1,3 @@
-import json
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
@@ -78,8 +77,10 @@ class book:
             "author": self.Author,
             "price": self.Price,
             "year": self.PrintYear,
-            "genres": json.dumps(self.Genre)
+            "genres": self.Genre
         }
+
+
 bookStore = bookStore()
 
 
@@ -112,11 +113,12 @@ def CreatNewBook():
         response = jsonify({"result": bookStore.booksNumber})
         return response, 200
 
+
 @app.route('/books/total', methods=['GET'], endpoint='getTotalBooks')
 def getTotalBooks():
     query_params = dict(request.args)
     numOfBooks = bookStore.findBook(query_params)
-    if (numOfBooks == -1):
+    if numOfBooks == -1:
         return '', 400
     else:
         return jsonify({"result": len(numOfBooks)}), 200
@@ -126,12 +128,13 @@ def getTotalBooks():
 def getBooksData():
     query_params = dict(request.args)
     books = bookStore.findBook(query_params)
-    if(books == -1):
+    if books == -1:
         empty_array = []
-        return jsonify({"result": json.dumps(empty_array)}), 200
+        return jsonify({"result": empty_array}), 200
     sorted_books = sorted(books, key=lambda x: x.Title)
     sorted_books_json = [book_obj.to_json() for book_obj in sorted_books]
     return jsonify({"result": sorted_books_json}), 200
+
 
 @app.route('/book', methods=['GET'], endpoint='getSingleBookData')
 def getBookData():
@@ -163,6 +166,7 @@ def deleteBookData():
             bookStore.books.remove(book)
             return jsonify({"result": len(bookStore.books)}), 200
     return jsonify({"errorMessage": f"Error: no such Book with id {id_param}"}), 404
+
 
 if __name__ == '__main__':
     app.run(debug=False, port=8574)
