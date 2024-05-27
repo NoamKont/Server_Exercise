@@ -37,9 +37,6 @@ class bookStore:
                                 continue
                 res = temp
 
-
-                #res = [book for book in res if book.Genre in filter["genres"].split(",")]
-
         return res
 
     def addBook(self,book):
@@ -129,16 +126,16 @@ def getTotalBooks():
 def getBooksData():
     query_params = dict(request.args)
     books = bookStore.findBook(query_params)
-    if(books ==-1):
-        empty_array = []  # TODO check with aviad if only result no error message
-        return jsonify({"errorMessage": json.dumps(empty_array)}), 200
-    sorted_books = sorted(books, key=lambda x: x.Author)
+    if(books == -1):
+        empty_array = []
+        return jsonify({"result": json.dumps(empty_array)}), 200
+    sorted_books = sorted(books, key=lambda x: x.Title)
     sorted_books_json = [book_obj.to_json() for book_obj in sorted_books]
     return jsonify({"result": sorted_books_json}), 200
 
 @app.route('/book', methods=['GET'], endpoint='getSingleBookData')
 def getBookData():
-    id_param = request.args.get('id')
+    id_param = int(request.args.get('id'))
     for book in bookStore.books:
         if book.Id == id_param:
             return jsonify({"result": book.to_json()}), 200
@@ -168,4 +165,4 @@ def deleteBookData():
     return jsonify({"errorMessage": f"Error: no such Book with id {id_param}"}), 404
 
 if __name__ == '__main__':
-    app.run(debug=False, port=6767)
+    app.run(debug=False, port=8574)
