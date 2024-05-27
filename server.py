@@ -120,7 +120,7 @@ def getTotalBooks():
     query_params = dict(request.args)
     numOfBooks = bookStore.findBook(query_params)
     if (numOfBooks == -1):
-        return jsonify({"errorMessage": "error"}), 400 ## לשאולללללללללללללללללללללללללללללללללללללללללללללללללללללללללללללללל
+        return '', 400
     else:
         return jsonify({"result": len(numOfBooks)}), 200
 
@@ -130,7 +130,7 @@ def getBooksData():
     query_params = dict(request.args)
     books = bookStore.findBook(query_params)
     if(books ==-1):
-        empty_array = []
+        empty_array = []  # TODO check with aviad if only result no error message
         return jsonify({"errorMessage": json.dumps(empty_array)}), 200
     sorted_books = sorted(books, key=lambda x: x.Author)
     sorted_books_json = [book_obj.to_json() for book_obj in sorted_books]
@@ -140,11 +140,32 @@ def getBooksData():
 def getBookData():
     id_param = request.args.get('id')
     for book in bookStore.books:
-        if book.id == id_param:
+        if book.Id == id_param:
             return jsonify({"result": book.to_json()}), 200
     return jsonify({"errorMessage": f"Error: no such Book with id {id_param}"}), 404
 
 
+@app.route('/book', methods=['PUT'], endpoint='updateBookprice')
+def updateBookData():
+    id_param = int(request.args.get('id'))
+    if id_param <= 0:
+        return jsonify({"errorMessage": f"Error: price update for book [{id_param}] must be a positive integer"}), 409
+    for book in bookStore.books:
+        if book.Id == id_param:
+            oldPrice = book.Price
+            book.Price = int(request.args.get('price'))
+            return jsonify({"result": oldPrice}), 200
+    return jsonify({"errorMessage": f"Error: no such Book with id {id_param}"}), 404
+
+
+@app.route('/book', methods=['DELETE'], endpoint='deleteBook')
+def deleteBookData():
+    id_param = int(request.args.get('id'))
+    for book in bookStore.books:
+        if book.Id == id_param:
+            bookStore.books.remove(book)
+            return jsonify({"result": len(bookStore.books)}), 200
+    return jsonify({"errorMessage": f"Error: no such Book with id {id_param}"}), 404
 
 if __name__ == '__main__':
     app.run(debug=False, port=6767)
